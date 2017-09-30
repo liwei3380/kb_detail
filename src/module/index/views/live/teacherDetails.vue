@@ -9,7 +9,7 @@
 				
 				<div class="content" @click="toLive(item)">
 					<div class="text-wrap">
-						<div class="title">{{item.name}}</div>
+						<div class="title"></div>
 						<span class="status" v-if="item.status">
 							<div class="btn">直播中</div>
 						</span>
@@ -17,6 +17,7 @@
 							<div class="btn">回放</div>
 						</span>
 					</div>
+					<div class="live-title">{{item.name}}</div>
 				</div>
 			</div>
 		</div>
@@ -45,7 +46,7 @@ export default {
 	created(){
 		//获取课程列表
 		for (var i = 0; i < 5; i++) {
-			this.lessons[i] = {name:'课程'+i,intro:'课程介绍',status:false}
+			this.lessons[i] = {name:'KPI的初步认识与讲解---李明老师',intro:'课程介绍',status:false}
 		}
 		this.lessons[0].status = true
 	}
@@ -87,8 +88,10 @@ export default {
 				width: 100%;
 				height: 3.2rem;
 				border-radius: 5px;
-				background:#dedede;
+				background: #dedede;
+				position: relative;
 				.text-wrap{
+					padding-top: .2rem;
 					display: flex;
 					align-items: center;
 					font-size: 12px;
@@ -107,6 +110,11 @@ export default {
 							text-align: center;
 						}
 					}
+				}
+				.live-title{
+					position: absolute;
+					bottom:.16rem;
+					left: .34rem;
 				}
 			}
 		}

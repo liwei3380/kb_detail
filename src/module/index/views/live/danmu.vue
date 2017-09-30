@@ -9,7 +9,7 @@
 			<div class="send-btn-box">
 				<span class="send-btn" @click="sendComment">发送</span>
 				<span class="emoji-btn" :class="{active:emojiVisible}" @click="emojiVisible = !emojiVisible;giftVisible = false"> </span>
-				<span class="gift-btn" @click="giftVisible = true;emojiVisible = false">gift</span>
+				<span class="gift-btn" @click="giftVisible = true;emojiVisible = false"></span>
 			</div>
 		</div>
 		<Gift v-if="giftVisible" @close="closeGift" @send="sendGift"></Gift>
@@ -252,6 +252,12 @@ export default {
 				display: inline-block;
 				border: 1px solid #dedede;
 				padding: 2px;
+			}
+			.gift-btn{
+				width: .44rem;
+				height: .47rem;
+				background: url(../../../../assets/images/live/gift_icon.png);
+				background-size: cover;
 			}
 			.emoji-btn{
 				width: 20px;

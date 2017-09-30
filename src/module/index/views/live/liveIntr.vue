@@ -48,7 +48,7 @@ export default {
 			appointedCount: 123,
 			commentCount: 123,
 			audienceCount: 123,
-			tabIndex: 1,
+			tabIndex: 0,
 			btnText: '免费活动',
 			appointed: true,
 		}
