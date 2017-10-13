@@ -1,9 +1,18 @@
 <template>
 	<div class="comment-item">
-		<img class="avatar" :src="comment.user.pic">
-		<span class="name">{{comment.user.nick}}</span>
-		<span class="time">{{commentTime}}</span>
-		<span class="content" v-html="commentContent" ></span>
+		<div class="title-img-wrap">
+			<img class="avatar" :src="comment.user.pic">
+			<div class="title-wrap">
+				<span class="name">{{comment.user.nick}}</span>
+				<span class="time">{{commentTime}}</span>
+			</div>
+			<!-- <div class="praise-box">
+				<span class="praise-btn" :class={active:isActive} @click="praise">{{praiseCount}}</span>
+			</div> -->
+			
+		</div>
+		
+		<div class="content" v-html="commentContent" ></div>
 	</div>
 </template>
 <script>
@@ -15,6 +24,8 @@ export default {
 		return{
 			commentTime: '',
 			commentContent: '',
+			isActive: false,
+			praiseCount: 365,
 		}
 	},
 	created(){
@@ -52,32 +63,86 @@ export default {
 	        }
 	        return _html;
 	    },
+	    praise(){
+	    	this.isActive = !this.isActive
+	    }
 	}
 }
 </script>
 <style lang="scss" scoped>
 .comment-item{
 	padding:3px 0;
-	.avatar{
-		height: .58rem;
-		width: .58rem;
-		border-radius: 50%;
-		vertical-align: middle;
-		border: 1px solid #e6454a;
+	font-size: .28rem;
+	&:first-child{
+		padding-top: .2rem;
 	}
-	.name{
-		font-size: .28rem;
-		color: blue;
+	&:last-child{
+		padding-bottom: 1.08rem;
 	}
-	.content,.time{
-		font-size: .26rem;
+	.title-img-wrap{
+		display: flex;
+		.avatar{
+			height: .58rem;
+			width: .58rem;
+			border-radius: 50%;
+			vertical-align: middle;
+			border: 1px solid #e6454a;
+		}
+		.title-wrap{
+			display: inline-block;
+			vertical-align: middle;
+			margin-left: .34rem;
+			width: 3.8rem;
+			.name{
+				font-size: .28rem;
+				display: inline-block;
+				width: 3.8rem;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+			.time{
+				color: #848484;
+			}
+			div{
+				color: #333333;
+				vertical-align: middle;
+			}
+		}
+		.praise-box{
+			width: 2rem;
+			text-align: right;
+			.praise-btn{
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				width: 2rem;
+				display: inline-block;
+				&:before{
+						content: '';
+						margin-right: .1rem;
+						display: inline-block;
+						width: .26rem;
+						height: .24rem;
+						background: url('../../../../assets/images/live/praise_gray_icon.png');
+						background-size: cover;
+					}
+				&.active:before{
+						content: '';
+						margin-right: .1rem;
+						display: inline-block;
+						width: .26rem;
+						height: .24rem;
+						background: url('../../../../assets/images/live/praise_red_icon.png');
+						background-size: cover;
+					}
+			}
+		}
 	}
-	.time{
-		color: #848484;
-	}
-	span{
-		color: #333333;
-		vertical-align: middle;
+	.content{
+		margin-left: 1rem;
+		border-bottom: 1px solid #bfbfbf;
+		padding: .28rem 0 .22rem 0;
 	}
 }
 </style>

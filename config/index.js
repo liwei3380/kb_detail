@@ -23,6 +23,21 @@ var proxyTable = {
         pathRewrite: {
             '^/postData': ''
         }
+    },
+    '/dtlive': {
+        //target: 'http://10.79.8.150:8080/',
+        target: 'https://tm.kbao123.com/dtlive',
+        changeOrigin: true,
+        pathRewrite: {
+            '^/dtlive': ''
+        }
+    },
+    '/tm': {
+        target: 'https://tm.kbao123.com/4.0/',
+        changeOrigin: true,
+        pathRewrite: {
+            '^/tm': ''
+        }
     }
 }
 
@@ -35,7 +50,7 @@ module.exports = {
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
     assetsPublicPath: './',
-    productionSourceMap: true,
+    productionSourceMap: false,
     // Gzip off by default as many popular static hosts such as
     // Surge or Netlify already gzip all static assets for you.
     // Before setting to `true`, make sure to:
@@ -50,7 +65,7 @@ module.exports = {
   },
   dev: {
     env: require('./dev.env'),
-    port: 8081,
+    port: 8080,
     autoOpenBrowser: true,
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',

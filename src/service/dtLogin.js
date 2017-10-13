@@ -23,7 +23,7 @@ function toLogin(callBackUrl){
         callBackUrl = callBackUrl ? callBackUrl : window.location.href;
         let returnUrl = urlHelper.delParam(callBackUrl,'userId')		//删除userId
         returnUrl = urlHelper.changeURLArg(callBackUrl,'random',pageRandom)	//动态修改random
-        // window.location.href = host.OP_TM+'/html5/loginNew/redLog.jsp?activityType=group&parentID='+userId+"&returnHref="+encodeURIComponent(returnUrl)
+        window.location.href = host.OP_TM+'/html5/loginNew/redLog.jsp?activityType=group&parentID='+userId+"&returnHref="+encodeURIComponent(returnUrl)
 	}
 }
 

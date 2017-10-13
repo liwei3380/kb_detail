@@ -6,12 +6,13 @@ import App from './App'
 import router from './router'
 import store from './store'
 import {sync} from 'vuex-router-sync'
+import {Loading} from '@/common/popUp';
 
 // import Element from 'element-ui'
 // import Axios from 'axios'
 
 // Vue.use(Element)
-// vue.use(Axios)
+Vue.use(Loading)
 
 Vue.config.productionTip = false
 

@@ -2,25 +2,63 @@
 	<div class="teacher">
 		<div class="photo-pos">
 			<img class="photo" :src="avatarSrc" @error="setErrorImg" alt="头像">
-			<div class="name">{{name}}</div>
+			<div class="name">{{lectuerName}}</div>
 		</div>
 		
-		<div class="more">
-			<router-link :to="'teacherDetails'" class="more-btn">了解讲师</router-link>
+		<div class="more" v-show="lectuer.is_official">
+			<div  class="more-btn" @click=teacherDetail>了解讲师</div>
 		</div>
 	</div>
 </template>
 <script>
+import api from '@/api'
 export default {
+	props:['lectuerId','lectuerHeadPic','lectuerName','userId','liveId'],
 	data(){
 		return{
-			name:'讲师张',
-			avatarSrc:'https://bug.kbao123.com/sclub/html5/images/shop/avaar.png',
+			avatarSrc: this.lectuerHeadPic,
+			lectuer: {is_official: 0},
+		}
+	},
+	watch:{
+		lectuerHeadPic: function(){
+			this.avatarSrc = this.lectuerHeadPic
+		},
+		lectuerId: function(){
+			let lectuerId = this.lectuerId
+			if (typeof this.lectuerId == 'undefined') {
+				return
+			}
+			let params = {
+				id: lectuerId,
+				userId: this.userId
+			}
+			var _this = this
+			api.getLiveLecture(params, function(isSuccess,data,err){
+				if (isSuccess) {
+					// 请求成功
+					if (data.status==200) {
+						// 返回数据成功
+						_this.lectuer = data.body
+					} else {
+						// 返回数据失败
+						alert(data.message)
+					}
+				} else {
+					// 请求失败
+					console.log(err)
+					alert('请求失败')
+				}
+			})
 		}
 	},
 	methods:{
 		setErrorImg(){
 			this.avatarSrc = require('../../../../assets/images/live/avatar.png')
+		},
+		teacherDetail(){
+			this.$emit('toDetail')
+			this.$router.push('teacherDetails?lectuerId='+this.lectuerId+'&liveId='+this.liveId)
 		}
 	}
 }

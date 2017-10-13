@@ -33,13 +33,13 @@ var routes = [
 	},
 	// 直播页面
 	{
-	    path: '/h5/live',
+	    path: '/h5/live/live',
 	    component: () => import('../views/live/live'),
 	    meta: {headerTitle: "直播"}
 	},
 	// 直播页面
 	{
-	    path: '/h5/teacherDetails',
+	    path: '/h5/live/teacherDetails',
 	    component: () => import('../views/live/teacherDetails'),
 	    meta: {headerTitle: "讲师信息"}
 	},
@@ -48,6 +48,18 @@ var routes = [
 	    path: '/h5/product',
 	    component: () => import('../views/productHouse/index'),
 	    meta: {headerTitle: "产品库",isShowHeader:true}
+	},
+	//考试星
+	{
+		path: '/drm',
+		component: () => import('../views/drm/drm'),
+		meta: {headerTitle: "认证考试"}
+	},
+	//定期寿
+	{
+		path: '/h5/termInsure/termInsure',
+		component: () => import('../views/termInsure/index'),
+		meta: {headerTitle: "产品详情"}
 	},
 ]
 

@@ -2,60 +2,31 @@
   <kbSlider :slider="rightSliders" animationDirect="rightToLeft" :isModalToClose="true">
     <div class="select-block" @click.stop>
     	<div class="s-main">
-    		<dl>
-	    		<dt class="f-border-bottom-line-gray">投保区域</dt>
-	    		<dd class="s-location">
-	    			<p class="f-border-radius-red"><span>北京</span></p>
-	    			<p><span>定位</span></p>
-	    		</dd>
-	    		<dl class="s-area">
-	    			<dt>省会</dt>
-	    			<dd>
-	    				<p class="f-border-radius-gray ">北京</p>
-	    				<p class="f-border-radius-gray ">北京</p>
-	    				<p class="f-border-radius-gray ">北京</p>
-	    				<p class="f-border-radius-gray ">北京</p>
-	    			</dd>
-	    		</dl>
-	    	</dl>
-	    	<dl>
-	    		<dt class="f-border-bottom-line-gray">按分类</dt>
-	    		<dd>
-	    			<p class="f-border-radius-gray ">交通意外</p>
-	    			<p class="f-border-radius-gray ">交通意外</p>
-	    			<p class="f-border-radius-gray ">交通意外</p>
-	    		</dd>
-	    	</dl>
-	    	<dl>
-	    		<dt class="f-border-bottom-line-gray">按品牌</dt>
-	    		<dd>
-	    			<p class="f-border-radius-gray ">安心</p>
-	    			<p class="f-border-radius-gray ">华夏</p>
-	    			<p class="f-border-radius-gray ">人寿</p>
-	    			<p class="f-border-radius-gray ">华夏</p>
-	    			<p class="f-border-radius-gray ">人寿</p>
-	    		</dd>
-	    	</dl>
-	    	<dl>
-	    		<dt class="f-border-bottom-line-gray">按品牌1</dt>
-	    		<dd>
-	    			<p class="f-border-radius-gray ">安心</p>
-	    			<p class="f-border-radius-gray ">华夏</p>
-	    			<p class="f-border-radius-gray ">人寿</p>
-	    			<p class="f-border-radius-gray ">华夏</p>
-	    			<p class="f-border-radius-gray ">人寿</p>
-	    		</dd>
-	    	</dl>
-	    	<dl>
-	    		<dt class="f-border-bottom-line-gray">按品牌2</dt>
-	    		<dd>
-	    			<p class="f-border-radius-gray ">安心</p>
-	    			<p class="f-border-radius-gray ">华夏</p>
-	    			<p class="f-border-radius-gray ">人寿</p>
-	    			<p class="f-border-radius-gray ">华夏</p>
-	    			<p class="f-border-radius-gray ">人寿</p>
-	    		</dd>
-	    	</dl>
+    		
+	    	<dl v-for="(value,key) in pSelsectData">
+	    		<template v-if="key == 'area'">
+	    			<dt class="f-border-bottom-line-gray" @click="toggleBlock(value)">投保区域<span :class='value.show==1?"active":""'></span></dt>
+    				<dd class="s-location" v-show="value.show == 1">
+		    			<p class="f-border-radius-red"><span>北京</span></p>
+		    			<p><span>定位</span></p>
+		    		</dd>
+		    		<dl class="s-area" v-show="value.show == 1">
+		    			<dt>{{value.name}}</dt>
+		    			<dd>
+		    				<p class="f-border-radius-gray " v-for="(v,k) in value.items">{{v}}</p>
+		    			</dd>
+		    		</dl>
+		    		
+	    		</template>
+	    		<template v-else>
+	    			<dt class="f-border-bottom-line-gray" @click="toggleBlock(value)">{{value.name}}<span :class='value.show==1?"active":""'></span></dt>
+		    		<dd v-show="value.show == 1">
+		    			<p class="f-border-radius-gray " v-for="(v,k) in value.items">{{v}}</p>
+		    			
+		    		</dd>
+	    		</template>
+    		</dl>
+
     	</div>
     	
         <div class="s-btn">
@@ -67,11 +38,22 @@
 </template>
 
 <script>
+
 import kbSlider from '@/common/kbSlider/index'
 export default{
-	props:['rightSliders'],
+	props:['rightSliders','pSelsectData'],
 	data(){
 		return{
+		}
+	},
+
+	methods:{
+		toggleBlock(item){
+			if (item.show == 0) {
+				item.show = 1
+			}else{
+				item.show = 0
+			}
 		}
 	},
 	components:{kbSlider},
@@ -105,6 +87,22 @@ $p-gray: #6a6a6a;
 		dt{
 		    line-height: .82rem;
 	    	padding-left: .5rem;
+	    	position: relative;
+	    	span{
+	    		display: inline-block;
+	    		background: url('../../../../assets/images/common/down-arrow.png') no-repeat;
+    		    position: absolute;
+			    right: .2rem;
+			    background-size: contain;
+			    top: 50%;
+			    margin-top: -.07rem;
+			    height: .2rem;
+			    width: .6rem;
+			    background-position: center;
+	    	}
+	    	span.active{
+	    		transform: rotate(180deg);
+	    	}
 		}
 		dd{
 			line-height: .65rem;

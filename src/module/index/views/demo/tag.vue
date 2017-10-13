@@ -17,10 +17,14 @@ export default {
   name: 'hello',
   data () {
     return {
-      msg: '原始测试数据'
+      msg: '原始测试数据',
     }
   },
   created(){
+    let str="1213"
+    // let linkUrl = `${this.host.OP_UCENTER}?test=${str}`;
+    console.log( `${this.host.OP_UCENTER}?test=${str}`)
+    // window.location.href = linkUrl;
     // 显示分享按钮
     // dtShare.showAppShareButton(1,1);
 
@@ -58,7 +62,8 @@ export default {
     ...mapGetters(['isLogin']),
     ...mapState({
         appOs:'appOs',
-        isAppOpen: 'isAppOpen'
+        isAppOpen: 'isAppOpen',
+        host:'host'
       }),
   },
 }

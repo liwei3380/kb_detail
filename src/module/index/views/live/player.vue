@@ -4,13 +4,13 @@
 		<div class="player-box" id='player'></div>
 	</div>
 	<!-- 倒计时 -->
-	<div class="countdown-pos">
+	<div class="countdown-pos" v-show="countDownVisible">
 		<div class="countdown">
 			{{countDown}}
 		</div>
 	</div>
 	<img :src=iconSrc class="icon">
-	<!-- <Danmu @danMu="danMu"></Danmu> -->
+
 </div>
 	
 </template>
@@ -18,23 +18,23 @@
 import helper from '@/utils/helper'
 //import Danmu from './danmu'
 export default {
+	props: ['userId','startTime','limitType'],
 	data(){
 		return {
 			danmu: '',
 			player: null,
 			countDown: '',
 			currentDate: null,
-			endtime: new Date('2017-09-28 10:00:00'),
+			countDownVisible: false,
 			iconSrc: require('assets/images/live/live_icon.png')
 		}
 	},
 	methods:{
-		danMu(str){
-			str = '[{"msg":"'+ str +'","fontSize":"24","fontColor":"0xCCCC00","fontMode":"roll"}]';
-			this.player.j2s_addBarrageMessage(str);
-			this.danmu = '';
-		},
+		
 		GetRTime(EndTime){
+			if (EndTime == 'Invalid Date'){
+				return
+			}
 			var NowTime = new Date();
 			var t =EndTime.getTime() - NowTime.getTime();
 			var d=0;
@@ -46,8 +46,13 @@ export default {
 				h=Math.floor(t/1000/60/60%24);
 				m=Math.floor(t/1000/60%60);
 				s=Math.floor(t/1000%60);
+				this.countDown = d + '天' + h + '时' + m + '分' + s + '秒'
+				this.countDownVisible = true
+			} else {
+				this.countDownVisible = false
+				this.$emit('toRTime')
 			}
-			this.countDown = d + '天' + h + '时' + m + '分' + s + '秒'
+			
 		}
 	},
 	mounted(){
@@ -63,8 +68,8 @@ export default {
 					'vid':'132926',
 					'width':'100%',
 					'height':'100%',
-					'param1':'152105133804494',
-					'param2':'testname',
+					'param1':_this.userId,
+					'param2':'testname'+_this.userId,
 					'flashvars':{"is_barrage":"on"},
 				});
 				_this.player.s2j_onInitOver = function( ){
@@ -73,10 +78,11 @@ export default {
 				}
 			} 
 		};
-		this.GetRTime(this.endtime)
+		
+		this.GetRTime(new Date(this.startTime))
 		var _this = this
 		setInterval(function(){
-			_this.GetRTime(_this.endtime)
+			_this.GetRTime(new Date(_this.startTime))
 		},1000);
 	}
 }

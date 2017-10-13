@@ -5,41 +5,70 @@
 			<DanmuItem v-for="item in comments" :comment=item :key=item.EVENT></DanmuItem>
 		</div>
 		<div class="send-box">
-			<input class="send-input" type="text" v-model=comment @focus="focusActive">
-			<div class="send-btn-box">
-				<span class="send-btn" @click="sendComment">发送</span>
-				<span class="emoji-btn" :class="{active:emojiVisible}" @click="emojiVisible = !emojiVisible;giftVisible = false"> </span>
-				<span class="gift-btn" @click="giftVisible = true;emojiVisible = false"></span>
+			<div class="send-pos">
+				<input class="send-input" type="text" v-model=comment @focus="focusActive" placeholder="我来说两句">
+				<div class="send-btn-box">
+					<span class="send-btn" @click="sendComment">发送</span>
+					<!-- <span class="emoji-btn" :class="{active:emojiVisible}" @click="emojiVisible = !emojiVisible;giftVisible = false"> </span> -->
+					<span class="gift-btn" @click="sliders.show=true"></span>
+				</div>
 			</div>
 		</div>
-		<Gift v-if="giftVisible" @close="closeGift" @send="sendGift"></Gift>
-		<Emoji v-show="emojiVisible" @select="selectEmoji" @del="delEmoji"></Emoji>
+		<Gift :sliders="sliders" @close="closeGift" @send="sendGift"></Gift>
+		<!-- <Emoji v-show="emojiVisible" @select="selectEmoji" @del="delEmoji"></Emoji> -->
+		<Pay @closePay="closePay" @confirmPay="confirmPay" :sliders=paySliders></Pay>
+		<div class="alipay-page" v-show=alipayVisible ref="alipay"></div>
 	</div>
 </template>
 <script>
 import md5 from 'js-md5';
-import {emotionslist} from '@/service/live/emotions.js'
+/*import {emotionslist} from '@/service/live/emotions.js'*/
 import helper from '@/utils/helper.js'
 import api from '@/api'
 import DanmuItem from './danmuItem'
-import Emoji from './emoji'
+/*import Emoji from './emoji'*/
 import Gift from './gift'
+import Pay from './pay'
+import {mapGetters,mapState} from 'vuex'
+import urlHelper from '@/utils/urlHelper.js'
+
 export default {
+	props: ['userId', 'liveId', 'lectuerId', 'toTeacher'],
 	data () {
 		return {
 			comment: '',
 			socket: null,
 			roomId: '',
 			comments: [],
-			giftVisible: false,
+			giftVisible: true,
 			emojiVisible: false,
 			pic: '',
-			userId: '',
 			nick: '',
+			sliders: {
+		        show:false,
+		        isNeedMask:true
+		    },
+		    paySliders: {
+		    	show:false,
+		        isNeedMask:true
+		    },
+		    alipayVisible: false,
 		}
 	},
 	components:{
-		DanmuItem,Emoji,Gift
+		DanmuItem,Gift,Pay
+	},
+	computed:{
+	    ...mapGetters(['isLogin']),
+	    ...mapState({
+	        appOs:'appOs',
+	        isAppOpen: 'isAppOpen'
+	    }),
+	},
+	watch: {
+		toTeacher: function(){
+
+		}
 	},
 	methods:{
 		sendComment(){
@@ -47,16 +76,10 @@ export default {
 				return
 			}
 			var data = JSON.stringify({
-	          'EVENT': 'SPEAK',
-	          'values': [this.comment],
-	          'roomId': this.roomId
-	        });
-	        /*var data = JSON.stringify({
-	          EVENT: 'FLOWERS',
-	          nick: 'testnic',
-	          roomId: this.roomId,
-	          uimg: "http://livestatic.videocc.net/v_73/assets/wimages/missing_face.png"
-	        });*/
+				'EVENT': 'SPEAK',
+				'values': [this.comment],
+				'roomId': this.roomId
+			});
 			this.socket.emit('message', data); //发送消息
 			this.$emit('danMu',this.comment)
 			this.comments.push({
@@ -65,7 +88,7 @@ export default {
 					nick: this.nick,
 					userId: this.userId,
 				},
-				time:'1506066200052',
+				time: new Date().getTime(),
 				values: [this.comment],
 			})
 			this.comment = ''
@@ -82,10 +105,82 @@ export default {
 			})
 		},
 		closeGift(){
-			this.giftVisible = false
+			this.sliders.show = false
 		},
-		sendGift(index){
-			this.giftVisible = false
+		sendGift(money,msg){
+			// 选择微信还是支付宝支付
+			this.paySliders.show = true
+			this.money = money
+			this.msg = typeof msg == 'undefined' ? '' : msg
+		},
+		closePay(){
+			this.paySliders.show = false
+		},
+		confirmPay(payType){
+			// console.log(pay)
+			// this.paySliders.show = false
+			// this.sliders.show = false
+			// return
+			this.money = 0.01
+			if (payType == 'alipay') {
+				//支付宝支付
+				let params = {
+					payType: payType,
+					payCode: 1,
+					liveId: this.liveId,
+					lectuerId: this.lectuerId,
+					money: this.money,
+					message: this.msg,
+					userId: this.userId
+				}
+				var _this = this
+				api.livePay(params, function(isSuccess, data, err){
+					if (isSuccess) {
+						// 请求成功
+						if (data.status==200) {
+							// 返回了支付宝form
+							_this.alipayVisible = true
+							_this.$refs.alipay.innerHTML = data.body.param
+							// 执行提交
+							document.forms['alipaysubmit'].submit();
+							return
+						} else {
+							// 返回数据失败
+							alert(data.message)
+						}
+					} else {
+						// 请求失败
+						alert("请求失败")
+					}
+				})
+			} else {
+				//微信支付
+				let params = {
+					payType: payType,
+					payCode: 1,
+					liveId: this.liveId,
+					lectuerId: this.lectuerId,
+					money: this.money,
+					message: this.msg,
+					userId: this.userId
+				}
+				var _this = this
+				api.livePay(params, function(isSuccess, data, err){
+					if (isSuccess) {
+						// 请求成功
+						if (data.status==200) {
+							console.log(data)
+							return
+						} else {
+							// 返回数据失败
+							alert(data.message)
+						}
+					} else {
+						// 请求失败
+						alert("请求失败")
+					}
+				})
+			}
 		},
 		delEmoji(){
 			var comment = this.comment.split('')
@@ -132,18 +227,21 @@ export default {
 				console.info('success')
 				/*params = 'roomId=' + roomId + '&page=1&len=100'
 				this.getOnlineUserList(params);*/
-				
 				_this.socket.emit('message', JSON.stringify({ //用户登录
 					'EVENT': 'LOGIN',
-					'values': [nickname, pic, userId], //昵称、头像地址、用户id
+					'values': [nickname, pic, _this.userId], //昵称、头像地址、用户id
 					'roomId': _this.roomId
 				}));
 			});
 			this.socket.on('message',function(message){  //接收信息事件
 		        var data = JSON.parse(message);
-		        console.log(data);
+		        console.log(data)
 		        if (data && data.EVENT) { //根据返回的不同事件类型作相应处理
 		          switch (data.EVENT) {
+		          	case 'LOGIN': // 登录
+		              break;
+		            case 'LOGOUT': // 登出
+		              break;
 		            case 'CLOSEROOM': // room closed
 		              break;
 		            case 'GONGGAO': //系统公告
@@ -182,28 +280,23 @@ export default {
 	},
 	mounted(){
 		
-		var socketIoScript = helper.pageAddScript('http://livestatic.videocc.net/assets/wjs/dist/socket.io.min.js')
+		var socketIoScript = helper.pageAddScript('https://tm.kbao123.com/h5/live/socket.io.min.js')
 
-		var time = new Date().getTime().toString().substring(0,10)
+/*		var time = new Date('2017-10-23').getTime().toString().substring(0,10)
 		var sign = md5(time + "polyvsign")
 		var tokenUrl = 'http://api.live.polyv.net/watchtoken/gettoken?ts=' + time + '&sign=' + sign
 		var params = '?ts=' + time + '&sign=' + sign
-		var chatToken = ''
+		var chatToken = ''*/
 		this.roomId = "132926";
 		var pic = 'http://livestatic.videocc.net/assets/wimages/missing_face.png';
-		var chatHost = 'http://chat.polyv.net:8000',  //socket连接地址
-			nickname = 'test',   //自定义用户名
-			userId = 'test111111',
-			chatHost2 = "http://api.chat.polyv.net:80";  //获取聊天内容地址
+		var chatHost = 'https://chat.polyv.net:8001',  //socket连接地址
+			nickname = 'test';   //自定义用户名
 		var _this = this
 		this.pic = pic;
-		this.userId = userId;
 		this.nick = nickname;
+		
 		socketIoScript.onload = function(){
-			api.getLiveToken(params,function(isSuccess,data,err){
-				chatToken = data
-				_this.socketConnect(chatToken, chatHost, nickname, userId, pic)
-			})
+			_this.socketConnect('', chatHost, nickname, _this.userId, pic)
 		}
 
 	}
@@ -211,10 +304,9 @@ export default {
 </script>
 <style lang="scss" scoped>
 .comment{
-	margin: 12px 0;
 	background-color: white;
 	box-sizing: border-box;
-	padding: 0 12px;
+	padding: 0 .32rem 0 .44rem;
 	.title{
 		font-size: 16px;
 		font-weight: 900;
@@ -224,52 +316,75 @@ export default {
 	.content{
 		box-sizing: border-box;
 		width: 100%;
-		max-height: 200px;
+		/* max-height: 400px; */
 		overflow-y: scroll;
 	}
 	.send-box{
-		display: flex;
 		position: fixed;
-		bottom: .16rem;
-		left: 12px;
-		right: 12px;
-		input{
-			width: 70%;
-			height: .84rem;
-			border-radius: 5px;
-			border: 1px solid #bfbfbf;
-			color: #adadad;
-		}
-		.send-btn-box{
-			width: 30%;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		background-color: #f5f5f5;
+		.send-pos{
+			margin: .12rem;
 			display: flex;
-			justify-content: flex-end;
-			.send-btn,.gift-btn,.emoji-btn{
-				font-size: 12px;
-				height: 20px;
-				line-height: 20px;
-				margin-right: 5px;
-				display: inline-block;
-				border: 1px solid #dedede;
-				padding: 2px;
+			input{
+				box-sizing: border-box;
+				width: 90%;
+				height: .84rem;
+				border-radius: 5px;
+				border: 1px solid #bfbfbf;
+				color: #adadad;
+				padding: .28rem .26rem;
 			}
-			.gift-btn{
-				width: .44rem;
-				height: .47rem;
-				background: url(../../../../assets/images/live/gift_icon.png);
-				background-size: cover;
-			}
-			.emoji-btn{
-				width: 20px;
-				background: url(http://livestatic.videocc.net/assets/wimages/icon-emotion.png);
-				background-size: cover;
-				vertical-align: middle;
-				&.active{
-					background: url(http://livestatic.videocc.net/assets/wimages/icon-keyboard.png);
+			.send-btn-box{
+				box-sizing: border-box;
+				height: .84rem;
+				padding-top: .18rem;
+				display: flex;
+				justify-content: flex-end;
+				.send-btn,.gift-btn,.emoji-btn{
+					font-size: 12px;
+					/*margin-right: 5px;*/
+					display: inline-block;
+					/*border: 1px solid #dedede;*/
+					vertical-align: middle;
+				}
+				.send-btn{
+					width: .88rem;
+					height: .47rem;
+					line-height: .47rem;
+					text-align: center;
+					background-color: #E6454B;
+					color: #ffffff;
+					border-radius: 5px;
+					margin: 0 .1rem;
+				}
+				.gift-btn{
+					width: .44rem;
+					height: .47rem;
+					background: url(../../../../assets/images/live/gift_icon.png);
 					background-size: cover;
+				}
+				.emoji-btn{
+					width: 20px;
+					background: url(http://livestatic.videocc.net/assets/wimages/icon-emotion.png);
+					background-size: cover;
+					vertical-align: middle;
+					&.active{
+						background: url(http://livestatic.videocc.net/assets/wimages/icon-keyboard.png);
+						background-size: cover;
+					}
 				}
 			}
 		}
+	}
+	.alipay-page{
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
 	}
 }
 

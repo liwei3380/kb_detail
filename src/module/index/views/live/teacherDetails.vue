@@ -1,7 +1,7 @@
 <template>
 	<div class="teacher-details">
 		<div class="teacher-intro">
-			<img :src=teacherSrc @error="setErrorImg" alt="头像">
+			<img :src=lectuer.pic @error="setErrorImg" alt="头像">
 		</div>
 		<div class="title title-first">讲师课程列表</div>
 		<div class="lesson-intro">
@@ -24,31 +24,59 @@
 	</div>
 </template>
 <script>
+import urlHelper from '@/utils/urlHelper.js'
+import api from '@/api'
 export default {
 	data () {
 		return {
-			teacherSrc:'https://bug.kbao123.com/sclub/html5/images/shop/avaar.png',
-			lessons:[],
+			teacherSrc: 'https://bug.kbao123.com/sclub/html5/images/shop/avaar.png',
+			lessons: [],
+			lectuer: {pic: ''}
 		}
 	},
 	methods: {
 		setErrorImg(){
-			this.teacherSrc = require('../../../../assets/images/live/avatar.png')
+			this.lectuer.pic = require('../../../../assets/images/live/avatar.png')
 		},
 		toLive(item){
 			if (item.status) {
-				this.$router.push('live')
+				console.log('live?liveId='+urlHelper.queryString('liveId') + '&fromTeacher=1')
+				this.$router.push('live?liveId='+urlHelper.queryString('liveId') + '&fromTeacher=1')
 			} else {
 				return
 			}
 		}
 	},
 	created(){
-		//获取课程列表
+		// 获取课程列表
+		
+		// 测试数据
 		for (var i = 0; i < 5; i++) {
 			this.lessons[i] = {name:'KPI的初步认识与讲解---李明老师',intro:'课程介绍',status:false}
 		}
 		this.lessons[0].status = true
+
+		let lectuerId = urlHelper.queryString('lectuerId')
+		let params = {
+				id: lectuerId,
+				userId: this.userId
+			}
+		var _this = this
+		api.getLiveLecture(params, function(isSuccess,data,err){
+			if (isSuccess) {
+				// 请求成功
+				if (data.status==200) {
+					// 返回数据成功
+					_this.lectuer = data.body
+				} else {
+					// 返回数据失败
+					alert(data.message)
+				}
+			} else {
+				// 请求失败
+				alert('请求失败')
+			}
+		})
 	}
 }
 </script>
@@ -64,6 +92,8 @@ export default {
 		img{
 			display: inline-block;
 			height: .98rem;
+			width: .98rem;
+			border-radius: .49rem;
 		}
 	}
 	.title{
@@ -104,6 +134,7 @@ export default {
 						.btn{
 							width: 1.2rem;
 							height: .35rem;
+							line-height: .35rem;
 							background: white;
 							border: 1px solid #e6454a;
 							border-radius: .18rem;

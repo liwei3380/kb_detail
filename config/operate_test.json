@@ -3,6 +3,7 @@
 	"OP_UCENTER": "https://www.ucenter.kb123.com",
 	"OP_HD": "http://baike.baidu.com/",
 	"OP_TM": "https://tm.kbao123.com/3.8",
+	"OP_TM_4": "https://tm.kbao123.com/4.0",
 	"OP_LIVE_POLYV": "http://api.live.polyv.net",
 	"OP_CHAT_POLYV": "http://api.chat.polyv.net:80"
 }

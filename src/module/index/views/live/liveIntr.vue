@@ -6,10 +6,10 @@
 		</div>
 		<div class="content-wrap" v-show="tabIndex==0">
 			<div class="header">
-				<div v-if=!living class="title">{{name}}</div>
-				<div v-if=!living class="time">直播时间：{{time}}</div>
-				<div v-if=!living class="pre-count">预约人数：{{appointedCount}}</div>
-				<div v-if=living class="title active">{{name}}</div>
+				<div v-if=!living class="title">{{theme}}</div>
+				<div v-if=!living class="time">直播时间：{{startTime}}</div>
+				<div v-if=!living class="pre-count">观看限制：{{limitType}}</div>
+				<div v-if=living class="title active">{{theme}}</div>
 				<div v-if=living class="subtitle">
 					<span class="left">观看{{audienceCount}}</span>
 					|
@@ -19,50 +19,64 @@
 			<div class="content">
 				<div class="title">直播简介</div>
 				<div class="text">
-					香冷金猊，被翻红浪，起来慵自梳头。任宝奁尘满，日上帘钩。生怕离怀别苦，多少事、欲说还休。新来瘦，非干病酒，不是悲秋。
-					休休，这回去也，千万遍《阳关》，也则难留。念武陵人远，烟锁秦楼。惟有楼前流水，应念我、终日凝眸。凝眸处，从今又添，一段新愁。
+					{{description}}
 				</div>
-				<div class="imgs">
+				<!-- <div class="imgs">
 					<img src="https://oss-kbvod-in.oss-cn-hangzhou.aliyuncs.com/content_3036AED5DC19DEA2EDABA1F3988B19F8_0_1501486955.jpg">
 					<img src="https://oss-kbvod-in.oss-cn-hangzhou.aliyuncs.com/content_3036AED5DC19DEA2EDABA1F3988B19F8_1_1501486955.jpg">
-				</div>
+				</div> -->
 			</div>
 			<div class="appointment">
-				<div class="btn" :class="{active:appointed}">
-					{{btnText}}
+				<div class="btn" v-show="isFree" @click="toSubscribe">
+					{{getBtnText}}
 				</div>
 			</div>
 		</div>
-		<Danmu v-show="tabIndex==1"></Danmu>
+		<!-- && isAppOpen 判断是否app打开，true 显示评论, false 不显示-->
+		<Danmu v-show="tabIndex==1 && canComment " :userId=userId :liveId=liveId :lectuerId=lectuerId :toTeacher=toTeacher @login=userNumber></Danmu>
 	</div>
 </template>
 <script>
 import {dateFormat} from '@/utils/helper.js'
 import Danmu from './Danmu'
 export default {
-	props:['living'],
+	props:['living','userId','subscribe','subscribeCount','theme','canComment','startTime','isAppOpen','description','liveId','lectuerId','limitType','toTeacher'],
 	data () {
 		return {
-			name: '第一讲：首次直播',
 			time: '',
 			appointedCount: 123,
 			commentCount: 123,
 			audienceCount: 123,
 			tabIndex: 0,
-			btnText: '免费活动',
-			appointed: true,
+			isFree: true,
 		}
 	},
-	created(){
-		this.time = dateFormat(new Date(),'yyyy-MM-dd hh:mm:ss')
-		if (this.appointed) {
-			this.btnText = '已预约'
+	computed : {
+		getBtnText(){
+			if (this.isFree) {
+				return '免费活动'
+			} else {
+				if (this.subscribe == '1') {
+					return '已预约'
+				} else {
+					return '立即预约'
+				}
+			}
+			
 		}
 	},
 	methods:{
 		changeTab(index){
 			this.tabIndex = index
-		}
+		},
+		toSubscribe(){
+			if (this.subscribe == 0) {
+				this.$emit('toSubscribe')
+			}
+		},
+		userNumber(number){
+			this.audienceCount = number
+		},
 	},
 	components:{
 		Danmu,
@@ -72,10 +86,12 @@ export default {
 <style lang="scss" scoped>
 	.live-intr{
 		width: 100%;
-		background-color: white;
+		
 		margin-top: 12px;
 		box-sizing: border-box;
+		padding-bottom: 1.5rem;
 		.tab{
+			background-color: white;
 			display:flex;
 			div{
 				width: 50%;
@@ -91,38 +107,40 @@ export default {
 			}
 		}
 		.content-wrap{
-			padding: .05rem .46rem;
+			background-color: white;
+			padding: .05rem .46rem .5rem .46rem;
 			.header{
 				border-bottom: 1px solid #dedede;
 				.title{
 					font-size: .28rem;
 					font-weight: 900;
 					color: #333333;
+					vertical-align: middle;
 					&:after{
 						content: '预告';
 						display: inline-block;
-						margin-left: 5px;
+						margin-left: 10px;
 						color: #e6454a;
 						font-size: .2rem;
-						height: .3rem;
-						padding: 0 .25rem;
-						text-align: center;
+						padding: .01rem .2rem;
+						border-radius: .2rem;
 						border: 1px solid #e6454a;
-						border-radius: .15rem;
+						vertical-align: middle;
+						transform: scale(0.9);
 					}
 				}
 				.active{
 					&:after{
 						content: '直播中';
 						display: inline-block;
-						margin-left: 5px;
+						margin-left: 10px;
 						color: #e6454a;
 						font-size: .2rem;
-						height: .3rem;
-						padding: 0 .25rem;
-						text-align: center;
+						padding: .01rem .2rem;
+						border-radius: .2rem;
 						border: 1px solid #e6454a;
-						border-radius: .15rem;
+						vertical-align: middle;
+						transform: scale(0.9);
 					}
 				}
 				.time,.pre-count{
@@ -139,6 +157,7 @@ export default {
 					font-size: .28rem;
 					padding: .26rem 0;
 					color: #333333;
+					font-weight: 900;
 				}
 				.imgs{
 					margin-top: .12rem;
@@ -150,6 +169,7 @@ export default {
 					font-size: .26rem;
 					color: #333333;
 					line-height: .38rem;
+					text-indent: .52rem;
 				}
 			}
 			.appointment{
